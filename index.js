@@ -5,6 +5,27 @@ const URL = process.env.URL;
 const GITHUB_TOKEN = process.env.GITHUB_TOKEN;
 const USER = process.env.USER;
 
+/**
+ * Following git emoji and conventional commits to determen version bump based on commits
+ * If not major or minor, then we assume it's patch
+ * https://gitmoji.carloscuesta.me/
+ * https://www.conventionalcommits.org/en/v1.0.0/#specification
+ *  */ 
+
+const isMajorChange = (change) => {
+    const firstWord = change.split(' ')[0];
+    return change.includes(':boom:') ||
+            change.includes('BREAKING CHANGE') ||
+            change.includes('BREAKING_CHANGE') ||
+            firstWord.includes('!');
+}
+
+const isMinorChange = (change) => {
+    const firstWord = change.split(' ')[0];
+    return change.includes(':sparkles:') ||
+            firstWord.includes('feat');
+}
+
 /***
  * @param {String} changelog: String of changes, where every line is an entry in changelog 
  * Changelog from git comes in string format, where every line 
@@ -25,7 +46,7 @@ const USER = process.env.USER;
 const groupChangelog = (changelog) => {
     let grouping = {};
     // Split changelog on new lines
-    changelog.split('\n').forEach(change => {
+    changelog.forEach(change => {
         // find the first word and group all changes by first word
         const key = change.substring(0, change.indexOf(' '));
         if (grouping[key] === undefined) {
@@ -88,8 +109,39 @@ const postToGit = async (url, key, body) => {
  */
 (async () => {
     console.log('Generating changelog....');
-    const groupedChanges = groupChangelog(CHANGELOG.body);
-    const changesTemplate = changesToTemplate(groupedChanges);
+
+    const changes = CHANGELOG.body.split('\n');
+    if (changes.length === 0) {
+        return;
+    }
+    const majorChanges = changes.filter((change) => {
+        return isMajorChange(change);
+    });
+
+    const minorChanges = changes.filter((change) => {
+        return isMinorChange(change);
+    });
+
+    const otherChanges = changes.filter((change) => {
+        return !isMajorChange(change) && !isMinorChange(change);
+    });
+
+    let changesTemplate = '';``
+
+    const groupedMajorChanges = groupChangelog(majorChanges);
+    if (Object.keys(groupedMajorChanges).length > 0) {
+        changesTemplate = `${changesTemplate}<h2>Major</h2>${changesToTemplate(groupedMajorChanges)}\n`;
+    }
+
+    const groupedMinorChanges = groupChangelog(minorChanges);
+    if (Object.keys(groupedMinorChanges).length > 0) {
+        changesTemplate = `${changesTemplate}<h2>Minor</h2>${changesToTemplate(groupedMinorChanges)}`;
+    }
+
+    const groupedOtherChanges = groupChangelog(otherChanges);
+    if (Object.keys(groupedOtherChanges).length > 0) {
+        changesTemplate = `${changesTemplate}<h2>Patch/Others</h2>${changesToTemplate(groupedOtherChanges)}`;
+    }
 
     const fullTemplate = 
 `
@@ -103,8 +155,9 @@ const postToGit = async (url, key, body) => {
 `;
 
     try {
+        // we don't really need a result here...
         const result = await postToGit(URL, GITHUB_TOKEN, fullTemplate);
-        console.log(result);
+        console.log('Changelog successfully posted');
     } catch(e) {
         throw e;
     }
