@@ -1,0 +1,40 @@
+name: Changelog Generator
+on:
+  # Trigger the workflow on pull request,
+  # but only for the master branch
+  pull_request:
+    branches:
+      - master
+jobs:
+  build:
+    # Job name is Chanegelog
+    name: Chanegelog
+    # This job runs on Linux
+    runs-on: ubuntu-latest
+    steps:
+        - uses: actions/checkout@v2
+        - uses: actions/setup-node@v1
+          with:
+            node-version: '10.x' 
+        - name: Github Fetcher
+          run: git fetch --no-tags --prune origin +refs/heads/*:refs/remotes/origin/* 
+        - name: Dependency installer
+          id: changelogDep
+          run: |
+            sudo apt-get -y install jq
+            npm ci
+        - name: Changelog Fetcher
+          id: changelog
+          run: |
+            body=$(jq -n --arg msg "$(git log --no-merges origin/develop ^origin/master --pretty='%s')" \
+                '{ body: $msg }')
+            echo ::set-env name=CHANGELOG::$body
+        - name: Changelog Generator
+          id: changelogGen
+          run: npm run changelog
+          env:
+              URL: ${{ github.event.pull_request.comments_url }}
+              USER: ${{ github.event.pull_request.user.login }}
+              GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          
+        
