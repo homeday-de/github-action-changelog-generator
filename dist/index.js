@@ -9653,6 +9653,9 @@ const postToGit = async (url, key, body) => {
         },
         body: JSON.stringify({ body })
     });
+    if (!rawResponse.ok) {
+        throw new Error(rawResponse.statusText);
+    }
     const content = await rawResponse.json();
     return content;
 }
@@ -9661,16 +9664,19 @@ const postToGit = async (url, key, body) => {
  * Action core
  */
 (async () => {
-    if (GITHUB_TOKEN === undefined) {
-        throw new Error('Missing auth thoken');
-    }
-    console.log('Generating changelog....');
-    let myOutput = '';
-    let myError = '';
     try {
-        // get all branches
+        if (GITHUB_TOKEN === undefined) {
+            throw new Error('Missing auth thoken');
+        }
+        console.log('Generating changelog....');
+        // we'll use github cli to provide us with commit diff
+        // first we need to fetch the needed branches
         await exec.exec('git fetch --no-tags --prune origin +refs/pull/*/head:refs/remotes/origin/pr/*');
         await exec.exec('git fetch --no-tags origin +refs/heads/*:refs/remotes/origin/*');
+        
+        // then we fetch the diff and grab the output
+        let myOutput = '';
+        let myError = '';
         const options = {};
         options.listeners = {
             stdout: (data) => {
@@ -9682,42 +9688,37 @@ const postToGit = async (url, key, body) => {
         };
         // get diff between master and current branch
         await exec.exec (`git log --no-merges origin/pr/${github.context.payload.pull_request.number} ^origin/master --pretty='%s'`, [], options);
-    } catch (e) {
-        throw e;
-    }
-    if (myError !== '') {
-        throw new Error(myError);
-    }
-    // output is quoted, so we need to remove the quotes
-    const changes = myOutput.split('\n').map((c) => c.substring(1, c.length - 1));
-    if (changes.length === 0) {
-        return;
-    }
-
-    const majorChanges = {
-        title: '<h3>Major</h3>',
-        changes: changes.filter(change => isMajorChange(change)),
-    }
-
-    const minorChanges = {
-        title: '<h3>Minor</h3>',
-        changes: changes.filter(change => isMinorChange(change)),
-    }
-
-    const otherChanges = {
-        title: '<h3>Changes</h3>',
-        changes: changes.filter(change => !isMajorChange(change) && !isMinorChange(change)),
-    };
-
-    let changesTemplate = '';
-    [majorChanges, minorChanges, otherChanges].forEach((changeType) => {
-        const groupedChanges = groupChangelog(changeType.changes);
-        if (Object.keys(groupedChanges).length > 0) {
-            changesTemplate = `${changesTemplate}${changeType.title}${changesToTemplate(groupedChanges)}<br/>`;
+        // If there were errors, we throw it
+        if (myError !== '') {
+            throw new Error(myError);
         }
-    })
+        // output is quoted, so we need to remove the quotes and split it by \n to get each change
+        const changes = myOutput.split('\n').map((c) => c.substring(1, c.length - 1));
+        
+        const majorChanges = {
+            title: '<h3>Major</h3>',
+            changes: changes.filter(change => isMajorChange(change)),
+        }
 
-    const fullTemplate = 
+        const minorChanges = {
+            title: '<h3>Minor</h3>',
+            changes: changes.filter(change => isMinorChange(change)),
+        }
+
+        const otherChanges = {
+            title: '<h3>Changes</h3>',
+            changes: changes.filter(change => !isMajorChange(change) && !isMinorChange(change)),
+        };
+
+        let changesTemplate = '';
+        [majorChanges, minorChanges, otherChanges].forEach((changeType) => {
+            const groupedChanges = groupChangelog(changeType.changes);
+            if (Object.keys(groupedChanges).length > 0) {
+                changesTemplate = `${changesTemplate}${changeType.title}${changesToTemplate(groupedChanges)}<br/>`;
+            }
+        })
+
+        const fullTemplate = 
 `
 <section>
     <p>
@@ -9726,13 +9727,14 @@ const postToGit = async (url, key, body) => {
     ${changesTemplate}
 </section>
 `;
-
-    try {
+    
         // we don't really need a result here...
-        const result = await postToGit(URL, GITHUB_TOKEN, fullTemplate);
+        const content = await postToGit(URL, GITHUB_TOKEN, fullTemplate);
+        console.log(content);
         console.log('Changelog successfully posted');
     } catch(e) {
-        throw e;
+        console.log(e);
+        process.exit(1);
     }
 })();
 
