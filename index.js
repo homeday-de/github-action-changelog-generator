@@ -147,9 +147,8 @@ const postToGit = async (url, key, body) => {
 `
 <section>
     <p>
-        Hey @${USER}, you can find your changelog underneath.
+        Hey @${USER}! Here's your changelog.
     </p>
-    <h1>Changelog</h1>
     ${changesTemplate}
 </section>
 `;

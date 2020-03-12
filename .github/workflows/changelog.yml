@@ -5,10 +5,12 @@ on:
   pull_request:
     branches:
       - master
+    types: [opened, reopened, synchronize]
+
 jobs:
-  build:
+  changelog:
     # Job name is Chanegelog
-    name: Chanegelog
+    name: Chanegelog Generator
     # This job runs on Linux
     runs-on: ubuntu-latest
     steps:
@@ -26,7 +28,7 @@ jobs:
         - name: Changelog Fetcher
           id: changelog
           run: |
-            body=$(jq -n --arg msg "$(git log --no-merges origin/develop ^origin/master --pretty='%s')" \
+            body=$(jq -n --arg msg "$(git log --no-merges origin/develop ^origin/${{ github.event.pull_request.head.ref }} --pretty='%s')" \
                 '{ body: $msg }')
             echo ::set-env name=CHANGELOG::$body
         - name: Changelog Generator
