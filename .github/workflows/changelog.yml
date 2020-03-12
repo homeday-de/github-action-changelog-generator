@@ -18,25 +18,15 @@ jobs:
         - uses: actions/setup-node@v1
           with:
             node-version: '10.x' 
-        - name: Github Fetcher
-          run: git fetch --no-tags --prune origin +refs/heads/*:refs/remotes/origin/* 
         - name: Dependency installer
           id: changelogDep
           run: |
-            sudo apt-get -y install jq
             npm ci
-        - name: Changelog Fetcher
-          id: changelog
-          run: |
-            body=$(jq -n --arg msg "$(git log --no-merges origin/${{ github.event.pull_request.head.ref }} ^origin/master --pretty='%s')" \
-                '{ body: $msg }')
-            echo ::set-env name=CHANGELOG::$body
         - name: Changelog Generator
           id: changelogGen
           run: npm run changelog
-          env:
-              URL: ${{ github.event.pull_request.comments_url }}
-              USER: ${{ github.event.pull_request.user.login }}
-              GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          env: 
+            token: ${{ secrets.GITHUB_TOKEN }}
+
           
         

@@ -1,6 +1,11 @@
 # Changelog Generator Github Action
 
-Github action that creates a changelog upon PR opening. The changelog will contain all the commit maessages grouped by type and change level (major, minor, patch).
+Github action that creates a changelog upon PR opening. The changelog will contain all the commit messages grouped by type and change level (major, minor, patch).
+
+## Dependencies
+
+To use this action, you need to use it together with `action/checkout` from github. 
+We need that to access git changes. See usage example under.
 
 ## How it works
 
@@ -35,6 +40,35 @@ Minor change is considered every commit that:
 
 Every change that is not `MAJOR` or `MINOR` falls under other changes.
 
+
+## Example setup
+
+```yml
+name: Changelog Generator
+on:
+  # Trigger the workflow on pull request,
+  # but only for the master branch
+  pull_request:
+    branches:
+      - master
+    types: [opened, reopened, synchronize]
+
+jobs:
+  changelog:
+    # Job name is Chanegelog
+    name: Chanegelog Generator
+    # This job runs on Linux
+    runs-on: ubuntu-latest
+    steps:
+        - uses: actions/checkout@v2
+        - uses: actions/setup-node@v1
+          with:
+            node-version: '10.x' 
+        - uses: homeday-de/github-action-changelog-generator
+          with:
+            token: ${{ secrets.GITHUB_TOKEN }}
+```
+
 ## Example output
 
 <section>
@@ -64,4 +98,3 @@ Please open a [PR](https://github.com/homeday-de/github-action-changelog-generat
 
 ## You like the project? 
 Why not giving us a star. ;)
-

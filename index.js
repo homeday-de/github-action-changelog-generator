@@ -1,9 +1,10 @@
 const fetch = require('node-fetch');
+const exec = require('@actions/exec');
+const github = require('@actions/github');
 
-const CHANGELOG = JSON.parse(process.env.CHANGELOG);
-const URL = process.env.URL;
-const GITHUB_TOKEN = process.env.GITHUB_TOKEN;
-const USER = process.env.USER;
+const URL = github.context.payload.pull_request.comments_url;
+const GITHUB_TOKEN = core.getInput("token") || process.env.token;
+const USER = github.context.payload.pull_request.user.login;
 
 /**
  * Following git emoji and conventional commits to determen version bump based on commits
@@ -108,9 +109,35 @@ const postToGit = async (url, key, body) => {
  * Action core
  */
 (async () => {
+    if (GITHUB_TOKEN === undefined) {
+        throw new Error('Missing auth thoken');
+    }
     console.log('Generating changelog....');
-
-    const changes = CHANGELOG.body.split('\n');
+    let myOutput = '';
+    let myError = '';
+    try {
+        // get all branches
+        await exec.exec('git fetch --no-tags --prune origin +refs/heads/*:refs/remotes/origin/*');
+        const options = {};
+        options.listeners = {
+            stdout: (data) => {
+                myOutput = `${myOutput}${data.toString()}`;
+            },
+            stderr: (data) => {
+                myError = `${myError}${data.toString()}`;
+            }
+        };
+        // get diff between master and current branch
+        await exec.exec (`git log --no-merges origin/${github.context.payload.pull_request.head.ref} ^origin/master --pretty='%s`, [], options);
+    } catch (e) {
+        throw e;
+    }
+    if (myError !== '') {
+        throw new Error(myError);
+    }
+    // for some reason the autput is prepended with '
+    // so we need to remove it
+    const changes = myOutput.split('\n').map((c) => c.substring(1));
     if (changes.length === 0) {
         return;
     }
