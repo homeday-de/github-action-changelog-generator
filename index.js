@@ -79,7 +79,7 @@ const changesToTemplate = (changes) => {
         changes[key].forEach((change) => {
             output = `${output}${change}<br/>`;
         });
-        output = `${output}<br/>`;
+        output = `${output}`;
     });
     return output;
 }
@@ -114,34 +114,29 @@ const postToGit = async (url, key, body) => {
     if (changes.length === 0) {
         return;
     }
-    const majorChanges = changes.filter((change) => {
-        return isMajorChange(change);
-    });
 
-    const minorChanges = changes.filter((change) => {
-        return isMinorChange(change);
-    });
-
-    const otherChanges = changes.filter((change) => {
-        return !isMajorChange(change) && !isMinorChange(change);
-    });
-
-    let changesTemplate = '';``
-
-    const groupedMajorChanges = groupChangelog(majorChanges);
-    if (Object.keys(groupedMajorChanges).length > 0) {
-        changesTemplate = `${changesTemplate}<h2>Major</h2>${changesToTemplate(groupedMajorChanges)}\n`;
+    const majorChanges = {
+        title: '<h3>Major</h3>',
+        changes: changes.filter(change => isMajorChange(change)),
     }
 
-    const groupedMinorChanges = groupChangelog(minorChanges);
-    if (Object.keys(groupedMinorChanges).length > 0) {
-        changesTemplate = `${changesTemplate}<h2>Minor</h2>${changesToTemplate(groupedMinorChanges)}`;
+    const minorChanges = {
+        title: '<h3>Minor</h3>',
+        changes: changes.filter(change => isMinorChange(change)),
     }
 
-    const groupedOtherChanges = groupChangelog(otherChanges);
-    if (Object.keys(groupedOtherChanges).length > 0) {
-        changesTemplate = `${changesTemplate}<h2>Patch/Others</h2>${changesToTemplate(groupedOtherChanges)}`;
-    }
+    const otherChanges = {
+        title: '<h3>Changes</h3>',
+        changes: changes.filter(change => !isMajorChange(change) && !isMinorChange(change)),
+    };
+
+    let changesTemplate = '';
+    [majorChanges, minorChanges, otherChanges].forEach((changeType) => {
+        const groupedChanges = groupChangelog(changeType.changes);
+        if (Object.keys(groupedChanges).length > 0) {
+            changesTemplate = `${changesTemplate}${changeType.title}${changesToTemplate(groupedChanges)}<br/>`;
+        }
+    })
 
     const fullTemplate = 
 `
