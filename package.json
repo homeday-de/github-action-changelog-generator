@@ -2,11 +2,11 @@
   "name": "github-action-changelog-generator",
   "version": "1.0.0",
   "description": "Github action that automatically generates changelog when PR is opened",
-  "main": "index.js",
+  "main": "dist/index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "changelog": "node src/index.js",
-    "build": "npx webpack --config webpack.config.js"
+    "changelog": "node dist/index.js",
+    "build": "node_modules/.bin/ncc build src/index.js"
   },
   "repository": {
     "type": "git",
@@ -31,7 +31,6 @@
     "node-fetch": "^2.6.0"
   },
   "devDependencies": {
-    "webpack": "^4.42.0",
-    "webpack-cli": "^3.3.11"
+    "@zeit/ncc": "^0.21.1"
   }
 }
