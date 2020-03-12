@@ -118,7 +118,7 @@ const postToGit = async (url, key, body) => {
     let myError = '';
     try {
         // get all branches
-        await exec.exec('git fetch --no-tags --prune origin +refs/heads/*:refs/remotes/origin/*');
+        await exec.exec('git fetch --no-tags --prune origin +refs/pull/*/head:refs/remotes/origin/pr/*');
         const options = {};
         options.listeners = {
             stdout: (data) => {
@@ -129,7 +129,7 @@ const postToGit = async (url, key, body) => {
             }
         };
         // get diff between master and current branch
-        await exec.exec (`git log --no-merges origin/${github.context.payload.pull_request.head.ref} ^origin/master --pretty='%s'`, [], options);
+        await exec.exec (`git log --no-merges origin/pr/${github.context.payload.pull_request.number} ^origin/master --pretty='%s'`, [], options);
     } catch (e) {
         throw e;
     }
