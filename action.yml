@@ -8,3 +8,6 @@ inputs:
   token:
     required: true
     description: 'As provided by Github Actions'
+runs:
+  using: 'node10'
+  main: 'index.js'
