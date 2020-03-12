@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "changelog": "node index.js"
+    "changelog": "node src/index.js"
   },
   "repository": {
     "type": "git",
@@ -24,9 +24,13 @@
   },
   "homepage": "https://github.com/homeday-de/github-action-changelog-generator#readme",
   "dependencies": {
+    "@actions/core": "^1.2.3",
     "@actions/exec": "^1.0.3",
     "@actions/github": "^2.1.1",
-    "checkout": "github:actions/checkout",
     "node-fetch": "^2.6.0"
+  },
+  "devDependencies": {
+    "webpack": "^4.42.0",
+    "webpack-cli": "^3.3.11"
   }
 }

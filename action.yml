@@ -10,4 +10,4 @@ inputs:
     description: 'As provided by Github Actions'
 runs:
   using: 'node12'
-  main: 'index.js'
+  main: 'lib/main.js'
