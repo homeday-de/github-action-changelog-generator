@@ -1,0 +1,32 @@
+{
+  "name": "github-action-changelog-generator",
+  "version": "1.0.0",
+  "description": "Github action that automatically generates changelog when PR is opened",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "changelog": "node index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/homeday-de/github-action-changelog-generator.git"
+  },
+  "keywords": [
+    "github",
+    "actions",
+    "changelog",
+    "gitflow"
+  ],
+  "author": "Sinisa Grubor",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/homeday-de/github-action-changelog-generator/issues"
+  },
+  "homepage": "https://github.com/homeday-de/github-action-changelog-generator#readme",
+  "dependencies": {
+    "@actions/exec": "^1.0.3",
+    "@actions/github": "^2.1.1",
+    "checkout": "github:actions/checkout",
+    "node-fetch": "^2.6.0"
+  }
+}
