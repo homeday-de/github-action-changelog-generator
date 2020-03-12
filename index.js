@@ -1,6 +1,7 @@
 const fetch = require('node-fetch');
 const exec = require('@actions/exec');
 const github = require('@actions/github');
+const core = require('@actions/core');
 
 const URL = github.context.payload.pull_request.comments_url;
 const GITHUB_TOKEN = core.getInput("token") || process.env.token;
