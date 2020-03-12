@@ -119,7 +119,7 @@ const postToGit = async (url, key, body) => {
     try {
         // get all branches
         await exec.exec('git fetch --no-tags --prune origin +refs/pull/*/head:refs/remotes/origin/pr/*');
-        await exec.exec('git fetch --no-tags --prune origin +refs/heads/*:refs/remotes/origin/*');
+        await exec.exec('git fetch --no-tags origin +refs/heads/*:refs/remotes/origin/*');
         const options = {};
         options.listeners = {
             stdout: (data) => {
