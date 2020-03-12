@@ -1,5 +1,5 @@
-name: 'Changelog Generator'
-description: 'Github action that creates a changelog upon PR opening. The changelog will contain all the commit messages grouped by type and change level (major, minor, patch).'
+name: '(Gitflow) Changelog Generator'
+description: 'Github action that creates a changelog upon PR opening. It contains commit messages grouped by type and change level (major, minor, patch).'
 author: 'sinisag'
 branding:
   icon: 'file-text'  
