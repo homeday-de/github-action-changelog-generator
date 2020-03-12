@@ -129,16 +129,15 @@ const postToGit = async (url, key, body) => {
             }
         };
         // get diff between master and current branch
-        await exec.exec (`git log --no-merges origin/${github.context.payload.pull_request.head.ref} ^origin/master --pretty='%s`, [], options);
+        await exec.exec (`git log --no-merges origin/${github.context.payload.pull_request.head.ref} ^origin/master --pretty='%s'`, [], options);
     } catch (e) {
         throw e;
     }
     if (myError !== '') {
         throw new Error(myError);
     }
-    // for some reason the autput is prepended with '
-    // so we need to remove it
-    const changes = myOutput.split('\n').map((c) => c.substring(1));
+    // output is quoted, so we need to remove the quotes
+    const changes = myOutput.split('\n').map((c) => c.substring(1, c.length - 1));
     if (changes.length === 0) {
         return;
     }
