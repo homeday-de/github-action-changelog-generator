@@ -61,10 +61,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
         - uses: actions/checkout@v2
-        - uses: actions/setup-node@v1
-          with:
-            node-version: '10.x' 
-        - uses: homeday-de/github-action-changelog-generator
+        - uses: homeday-de/github-action-changelog-generator@v1.0.0
           with:
             token: ${{ secrets.GITHUB_TOKEN }}
 ```
