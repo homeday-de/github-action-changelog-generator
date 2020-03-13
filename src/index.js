@@ -23,9 +23,9 @@ const isMajorChange = (change) => {
 }
 
 const isMinorChange = (change) => {
-    const firstWord = change.split(' ')[0];
+    const firstWord = change.split(': ')[0];
     return change.includes(':sparkles:') ||
-            firstWord.startsWith('feat');
+            firstWord === 'feat';
 }
 
 /***
