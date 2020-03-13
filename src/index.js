@@ -19,13 +19,13 @@ const isMajorChange = (change) => {
     return change.includes(':boom:') ||
             change.includes('BREAKING CHANGE') ||
             change.includes('BREAKING_CHANGE') ||
-            firstWord.includes('!');
+            firstWord.endsWith('!:');
 }
 
 const isMinorChange = (change) => {
     const firstWord = change.split(' ')[0];
     return change.includes(':sparkles:') ||
-            firstWord.includes('feat');
+            firstWord.startsWith('feat');
 }
 
 /***
