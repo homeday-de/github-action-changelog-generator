@@ -18,10 +18,6 @@ jobs:
         - uses: actions/setup-node@v1
           with:
             node-version: '10.x' 
-        - name: Dependency installer
-          id: changelogDep
-          run: |
-            npm ci
         - name: Changelog Generator
           id: changelogGen
           run: npm run changelog

@@ -5,7 +5,7 @@
   "main": "dist/index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "changelog": "node src/index.js",
+    "changelog": "node dist/index.js",
     "build": "node_modules/.bin/ncc build src/index.js"
   },
   "repository": {
@@ -32,5 +32,8 @@
   },
   "devDependencies": {
     "@zeit/ncc": "^0.21.1"
+  },
+  "gitHooks": {
+    "pre-push": "sh build.sh"
   }
 }
