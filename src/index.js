@@ -5,6 +5,7 @@ const core = require('@actions/core');
 
 const URL = github.context.payload.pull_request.comments_url;
 const GITHUB_TOKEN = core.getInput("token") || process.env.token;
+const USE_MENTION = core.getInput("mention") || process.env.mention;
 const USER = github.context.payload.pull_request.user.login;
 
 /**
@@ -170,9 +171,7 @@ const postToGit = async (url, key, body) => {
         const fullTemplate = 
 `
 <section>
-    <p>
-        Hey @${USER}! Here's your changelog.
-    </p>
+    ${USE_MENTION ? `<p>Hey @${USER}! Here's your changelog.</p>` : ''}
     ${changesTemplate}
 </section>
 `;
